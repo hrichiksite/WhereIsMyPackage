@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
+import Image from 'next/image'
 import { Loader2, ArrowRight, Clock, Info } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -67,15 +68,15 @@ function ShipmentOverview({ origin, destination, daysInTransit }: {
           <div className="bg-blue-50 rounded-lg p-4 text-center">
             <div className="mb-2 text-sm font-medium text-muted-foreground">Origin country/region</div>
             <div className="flex flex-col items-center gap-3">
-              <div className="w-16 h-12 overflow-hidden rounded-lg shadow-sm">
-                <img
-                  src={`https://flagcdn.com/${origin.code.toLowerCase()}.svg`}
-                  alt={`${origin.name} flag`}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div className="font-medium">{origin.name}</div>
+              <Image
+                src={`https://flagcdn.com/${origin.code.toLowerCase()}.svg`}
+                alt={`${origin.name} flag`}
+                width={64}
+                height={48}
+                className="w-full h-full object-contain"
+              />
             </div>
+            <div className="font-medium">{origin.name}</div>
           </div>
           <div className="flex items-center justify-center">
             <div className="relative w-16">
@@ -86,15 +87,15 @@ function ShipmentOverview({ origin, destination, daysInTransit }: {
           <div className="bg-blue-50 rounded-lg p-4 text-center">
             <div className="mb-2 text-sm font-medium text-muted-foreground">Destination country/region</div>
             <div className="flex flex-col items-center gap-3">
-              <div className="w-16 h-12 overflow-hidden rounded-lg shadow-sm">
-                <img
-                  src={`https://flagcdn.com/${destination.code.toLowerCase()}.svg`}
-                  alt={`${destination.name} flag`}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div className="font-medium">{destination.name}</div>
+              <Image
+                src={`https://flagcdn.com/${destination.code.toLowerCase()}.svg`}
+                alt={`${destination.name} flag`}
+                width={64}
+                height={48}
+                className="w-full h-full object-contain"
+              />
             </div>
+            <div className="font-medium">{destination.name}</div>
           </div>
         </div>
       </div>
@@ -122,9 +123,11 @@ export default function Component() {
 
 
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (trackingNumber && selectedCarrier) {
+      //set query params
+      window.history.replaceState({}, document.title, `${window.location.pathname}?trackingID=${trackingNumber}&carrier=${selectedCarrier}`)
       setIsLoading(true)
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_HOSTNAME}/track/${trackingNumber}/${selectedCarrier}`)
@@ -138,7 +141,7 @@ export default function Component() {
         setIsLoading(false)
       }
     }
-  }
+  }, [trackingNumber, selectedCarrier])
 
   const groupConsecutiveEvents = (events: TrackingData['transitEvents']) => {
     return events.reduce((acc, event, index) => {
@@ -161,7 +164,7 @@ export default function Component() {
       setSelectedCarrier(carrier)
       handleSubmit(new Event('submit') as unknown as React.FormEvent)
     }
-  }, [])
+  }, [handleSubmit])
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -226,7 +229,7 @@ export default function Component() {
                 {carriers.map((carrier) => (
                   <SelectItem key={carrier.apiCode} value={carrier.apiCode}>
                     <div className="flex items-center">
-                      <img src={carrier.logo} alt={carrier.name} className="w-5 h-5 mr-2" />
+                      <Image src={carrier.logo} alt={carrier.name} width={40} height={40} className="w-5 h-5 mr-2" />
                       {carrier.name}
                     </div>
                   </SelectItem>
@@ -239,7 +242,7 @@ export default function Component() {
           </form>
         </div>
         <footer className="absolute bottom-4 text-center text-sm text-muted-foreground font-sans">
-          Made during Hack Club's YSWS program - High Seas
+          Made during Hack Club&apos;s YSWS program - High Seas
         </footer>
       </div>
     )
@@ -261,6 +264,8 @@ export default function Component() {
                   setIsTracking(false)
                   setTrackingNumber("")
                   setTrackingData(null)
+                  // Clear query params
+                  window.history.replaceState({}, document.title, window.location.pathname)
                 }}
               >
                 ← Back
