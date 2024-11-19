@@ -28,7 +28,8 @@ const loadingQuotes = [
 ]
 
 const carriers = [
-  { name: "4PX", logo: "/carrierlogos/4px.png", apiCode: "4px" }
+  { name: "4PX", logo: "/carrierlogos/4px.png", apiCode: "4px" },
+  { name: "Asendia", logo: "/carrierlogos/asendia.png", apiCode: "asendia" }
 ]
 
 interface Country {
@@ -126,6 +127,11 @@ export default function Component() {
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (trackingNumber && selectedCarrier) {
+      //if tracking number starts with 'AS' then it is an Asendia tracking number
+      //auto select Asendia as the carrier
+      if (trackingNumber.startsWith('AS')) {
+        setSelectedCarrier('asendia')
+      }
       //set query params
       window.history.replaceState({}, document.title, `${window.location.pathname}?trackingID=${trackingNumber}&carrier=${selectedCarrier}`)
       setIsLoading(true)
