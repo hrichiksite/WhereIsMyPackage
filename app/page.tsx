@@ -129,7 +129,7 @@ export default function Component() {
     if (trackingNumber && selectedCarrier) {
       //if tracking number starts with 'AS' then it is an Asendia tracking number
       //auto select Asendia as the carrier
-      if (trackingNumber.startsWith('AS')) {
+      if (trackingNumber.startsWith('AS') || trackingNumber.startsWith('AHOY')) {
         setSelectedCarrier('asendia')
       }
       //set query params
